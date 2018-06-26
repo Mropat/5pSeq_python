@@ -1,3 +1,0 @@
-The contents of the annotation directories were downloaded from Ensembl on: May 27, 2014.
-
-Annotation files in this directory and subdirectories were downloaded from EnsemblGenomes release 22.
