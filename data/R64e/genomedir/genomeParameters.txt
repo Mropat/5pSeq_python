@@ -1,0 +1,14 @@
+### STAR   --runMode genomeGenerate   --runThreadN 4   --genomeDir ./genomedir   --genomeFastaFiles genome.fa      --sjdbGTFfile genes.gtf
+versionGenome	20201
+genomeFastaFiles	genome.fa 
+genomeSAindexNbases	14
+genomeChrBinNbits	18
+genomeSAsparseD	1
+sjdbOverhang	100
+sjdbFileChrStartEnd	- 
+sjdbGTFfile	genes.gtf
+sjdbGTFchrPrefix	-
+sjdbGTFfeatureExon	exon
+sjdbGTFtagExonParentTranscript	transcript_id
+sjdbGTFtagExonParentGene	gene_id
+sjdbInsertSave	Basic

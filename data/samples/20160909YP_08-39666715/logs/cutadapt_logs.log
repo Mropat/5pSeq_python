@@ -1,0 +1,37 @@
+This is cutadapt 1.16 with Python 3.5.2
+Command line parameters: -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC --match-read-wildcards -m 10 -o cutadapt/logs logs.fastq -j 4
+Running on 4 cores
+Trimming 1 adapter with at most 10.0% errors in single-end mode ...
+ERROR: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/cutadapt/pipeline.py", line 365, in reader_process
+    with xopen(file, 'rb') as f:
+  File "/usr/local/lib/python3.5/dist-packages/xopen.py", line 252, in xopen
+    return open(filename, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs.fastq'
+
+ERROR: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/cutadapt/pipeline.py", line 365, in reader_process
+    with xopen(file, 'rb') as f:
+  File "/usr/local/lib/python3.5/dist-packages/xopen.py", line 252, in xopen
+    return open(filename, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs.fastq'
+
+ERROR: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/cutadapt/pipeline.py", line 365, in reader_process
+    with xopen(file, 'rb') as f:
+  File "/usr/local/lib/python3.5/dist-packages/xopen.py", line 252, in xopen
+    return open(filename, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs.fastq'
+
+ERROR: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/cutadapt/pipeline.py", line 430, in run
+    raise e
+FileNotFoundError: [Errno 2] No such file or directory: 'logs.fastq'
+
+ERROR: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/cutadapt/pipeline.py", line 365, in reader_process
+    with xopen(file, 'rb') as f:
+  File "/usr/local/lib/python3.5/dist-packages/xopen.py", line 252, in xopen
+    return open(filename, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs.fastq'
+
