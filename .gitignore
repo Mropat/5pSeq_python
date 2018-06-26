@@ -50,4 +50,5 @@ articles*
 .vscode*
 scripts/R*
 _STARgenome*
+*.log
 
