@@ -1,3 +1,5 @@
+#Script suggested by plastid developer to extend UTR coordinates in .gtf file. Only works if no splicing occurs in species. 
+
 from plastid import *
 
 new_gtf = open("expanded_gtf.gtf", "w")

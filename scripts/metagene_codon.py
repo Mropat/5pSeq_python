@@ -56,4 +56,4 @@ for x in range(-48,49):
 plt.grid(True, alpha=0.3)
 plt.step(np.linspace(-48, 49, num=100), metagene, linewidth=0.5, color="red", fillstyle="full")
 plt.xticks(np.linspace(-48, 49, num=100), xlabels, size="xx-small")
-plt.savefig("codon.pdf")
+plt.savefig("plots/codon.pdf")
