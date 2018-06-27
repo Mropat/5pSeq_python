@@ -1,4 +1,4 @@
-from plastid import GTF2_TranscriptAssembler
+from plastid import GTF2_TranscriptAssembler, Transcript, GenomicSegment
 import dill
 
 gtffile = list(GTF2_TranscriptAssembler("/home/maria/Documents/pelechanolab/data/R64e/genes.gtf", return_type=Transcript))
