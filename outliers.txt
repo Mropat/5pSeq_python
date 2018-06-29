@@ -1,0 +1,876 @@
+Outlier
+YAL038W
+Max value: 456.0
+Position: 266
+Frame: 1
+
+Outlier
+YAL021C
+Max value: 70.0
+Position: 477
+Frame: 0
+
+Outlier
+YAL003W
+Max value: 783.0
+Position: -21
+Frame: 0
+
+Outlier
+YBL092W
+Max value: 100.0
+Position: 107
+Frame: 1
+
+Outlier
+YBL072C
+Max value: 583.0
+Position: 31
+Frame: 2
+
+Outlier
+YBL017C
+Max value: 125.0
+Position: 4479
+Frame: 0
+
+Outlier
+YBL010C
+Max value: 446.0
+Position: 155
+Frame: 1
+
+Outlier
+YBR011C
+Max value: 152.0
+Position: 123
+Frame: 0
+
+Outlier
+YBR048W
+Max value: 79.0
+Position: 493
+Frame: 2
+
+Outlier
+YBR084W
+Max value: 90.0
+Position: 1063
+Frame: 2
+
+Outlier
+YBR092C
+Max value: 86.0
+Position: 1238
+Frame: 1
+
+Outlier
+YBR118W
+Max value: 89.0
+Position: -15
+Frame: 0
+
+Outlier
+YBR121C
+Max value: 142.0
+Position: 344
+Frame: 1
+
+Outlier
+YBR127C
+Max value: 84.0
+Position: 1467
+Frame: 0
+
+Outlier
+YBR189W
+Max value: 133.0
+Position: -23
+Frame: 2
+
+Outlier
+YBR196C
+Max value: 207.0
+Position: 813
+Frame: 0
+
+Outlier
+YBR249C
+Max value: 94.0
+Position: 319
+Frame: 2
+
+Outlier
+YCL037C
+Max value: 92.0
+Position: 562
+Frame: 2
+
+Outlier
+YCR012W
+Max value: 104.0
+Position: 298
+Frame: 2
+
+Outlier
+YCR031C
+Max value: 124.0
+Position: 217
+Frame: 2
+
+Outlier
+YDL205C
+Max value: 125.0
+Position: 11
+Frame: 1
+
+Outlier
+YDL185W
+Max value: 76.0
+Position: 991
+Frame: 2
+
+Outlier
+YDL140C
+Max value: 83.0
+Position: 3060
+Frame: 0
+
+Outlier
+YDL082W
+Max value: 136.0
+Position: 163
+Frame: 2
+
+Outlier
+YDL014W
+Max value: 72.0
+Position: 1002
+Frame: 0
+
+Outlier
+YDR050C
+Max value: 72.0
+Position: -18
+Frame: 0
+
+Outlier
+YDR064W
+Max value: 156.0
+Position: 297
+Frame: 0
+
+Outlier
+YDR077W
+Max value: 203.0
+Position: 120
+Frame: 0
+
+Outlier
+YDR212W
+Max value: 237.0
+Position: 1567
+Frame: 2
+
+Outlier
+YDR365C
+Max value: 107.0
+Position: 239
+Frame: 1
+
+Outlier
+YDR385W
+Max value: 84.0
+Position: -17
+Frame: 2
+
+Outlier
+YDR418W
+Max value: 121.0
+Position: -34
+Frame: 1
+
+Outlier
+YDR461W
+Max value: 78.0
+Position: -25
+Frame: 1
+
+Outlier
+YDR500C
+Max value: 324.0
+Position: -16
+Frame: 1
+
+Outlier
+YDR524C-B
+Max value: 115.0
+Position: -42
+Frame: 0
+
+Outlier
+YDR524C-A
+Max value: 115.0
+Position: 150
+Frame: 0
+
+Outlier
+YIL148W
+Max value: 130.0
+Position: 180
+Frame: 0
+
+Outlier
+YIL018W
+Max value: 283.0
+Position: 428
+Frame: 1
+
+Outlier
+Q0050
+Max value: 75.0
+Position: 169
+Frame: 2
+
+Outlier
+Q0055
+Max value: 126.0
+Position: 2154
+Frame: 0
+
+Outlier
+Q0060
+Max value: 86.0
+Position: 205
+Frame: 2
+
+Outlier
+Q0065
+Max value: 86.0
+Position: 205
+Frame: 2
+
+Outlier
+Q0070
+Max value: 86.0
+Position: 205
+Frame: 2
+
+Outlier
+Q0045
+Max value: 86.0
+Position: 205
+Frame: 2
+
+Outlier
+Q0130
+Max value: 141.0
+Position: -9
+Frame: 0
+
+Outlier
+YEL054C
+Max value: 96.0
+Position: -42
+Frame: 0
+
+Outlier
+YER056C-A
+Max value: 89.0
+Position: 266
+Frame: 1
+
+Outlier
+YER095W
+Max value: 120.0
+Position: 1240
+Frame: 2
+
+Outlier
+YER102W
+Max value: 91.0
+Position: -7
+Frame: 1
+
+Outlier
+YER110C
+Max value: 103.0
+Position: 3250
+Frame: 2
+
+Outlier
+YER117W
+Max value: 95.0
+Position: -15
+Frame: 0
+
+Outlier
+YFL032W
+Max value: 135.0
+Position: 275
+Frame: 1
+
+Outlier
+YFL031W
+Max value: 135.0
+Position: -32
+Frame: 2
+
+Outlier
+YFL018C
+Max value: 221.0
+Position: 371
+Frame: 1
+
+Outlier
+YFR031C-A
+Max value: 79.0
+Position: 613
+Frame: 2
+
+Outlier
+YFR032C-A
+Max value: 162.0
+Position: -3
+Frame: 0
+
+Outlier
+YFR032C-B
+Max value: 410.0
+Position: 180
+Frame: 0
+
+Outlier
+YGL189C
+Max value: 709.0
+Position: -8
+Frame: 2
+
+Outlier
+YGL188C-A
+Max value: 171.0
+Position: -15
+Frame: 0
+
+Outlier
+YGL135W
+Max value: 96.0
+Position: -5
+Frame: 2
+
+Outlier
+YGL105W
+Max value: 69.0
+Position: 19
+Frame: 2
+
+Outlier
+YGL103W
+Max value: 82.0
+Position: 355
+Frame: 2
+
+Outlier
+YGL088W
+Max value: 100.0
+Position: 158
+Frame: 1
+
+Outlier
+YGL076C
+Max value: 155.0
+Position: -22
+Frame: 1
+
+Outlier
+YGL031C
+Max value: 77.0
+Position: 324
+Frame: 0
+
+Outlier
+YGL030W
+Max value: 155.0
+Position: -14
+Frame: 2
+
+Outlier
+YGL008C
+Max value: 81.0
+Position: -16
+Frame: 1
+
+Outlier
+YGR159C
+Max value: 456.0
+Position: 848
+Frame: 1
+
+Outlier
+YGR184C
+Max value: 86.0
+Position: 2595
+Frame: 0
+
+Outlier
+YGR192C
+Max value: 977.0
+Position: -9
+Frame: 0
+
+Outlier
+YHL033C
+Max value: 112.0
+Position: -9
+Frame: 0
+
+Outlier
+YHL015W
+Max value: 396.0
+Position: -30
+Frame: 0
+
+Outlier
+YHR010W
+Max value: 147.0
+Position: 166
+Frame: 2
+
+Outlier
+YHR025W
+Max value: 88.0
+Position: 959
+Frame: 1
+
+Outlier
+YHR141C
+Max value: 72.0
+Position: -19
+Frame: 1
+
+Outlier
+YHR174W
+Max value: 377.0
+Position: 148
+Frame: 2
+
+Outlier
+YHR203C
+Max value: 89.0
+Position: 19
+Frame: 2
+
+Outlier
+YJL189W
+Max value: 105.0
+Position: -22
+Frame: 1
+
+Outlier
+YJL158C
+Max value: 71.0
+Position: -28
+Frame: 1
+
+Outlier
+YJL079C
+Max value: 658.0
+Position: -39
+Frame: 0
+
+Outlier
+YJR009C
+Max value: 72.0
+Position: 0
+Frame: 0
+
+Outlier
+YJR094W-A
+Max value: 85.0
+Position: 2
+Frame: 1
+
+Outlier
+YJR123W
+Max value: 119.0
+Position: 322
+Frame: 2
+
+Outlier
+YJR145C
+Max value: 123.0
+Position: 19
+Frame: 2
+
+Outlier
+YKL182W
+Max value: 105.0
+Position: 600
+Frame: 0
+
+Outlier
+YKL152C
+Max value: 382.0
+Position: 497
+Frame: 1
+
+Outlier
+YKL101W
+Max value: 71.0
+Position: 1937
+Frame: 1
+
+Outlier
+YKL096W-A
+Max value: 118.0
+Position: -38
+Frame: 2
+
+Outlier
+YKL081W
+Max value: 193.0
+Position: 611
+Frame: 1
+
+Outlier
+YKL060C
+Max value: 184.0
+Position: -14
+Frame: 2
+
+Outlier
+YKR048C
+Max value: 294.0
+Position: 527
+Frame: 1
+
+Outlier
+YKR094C
+Max value: 81.0
+Position: 165
+Frame: 0
+
+Outlier
+YKR099W
+Max value: 124.0
+Position: 712
+Frame: 2
+
+Outlier
+YLL024C
+Max value: 443.0
+Position: 4
+Frame: 2
+
+Outlier
+YLR029C
+Max value: 1584.0
+Position: 340
+Frame: 2
+
+Outlier
+YLR044C
+Max value: 109.0
+Position: 920
+Frame: 1
+
+Outlier
+YLR075W
+Max value: 1917.0
+Position: 134
+Frame: 1
+
+Outlier
+YLR110C
+Max value: 355.0
+Position: -43
+Frame: 1
+
+Outlier
+YLR150W
+Max value: 228.0
+Position: 15
+Frame: 0
+
+Outlier
+YLR167W
+Max value: 1013.0
+Position: -43
+Frame: 1
+
+Outlier
+YLR180W
+Max value: 708.0
+Position: 1054
+Frame: 2
+
+Outlier
+YLR185W
+Max value: 227.0
+Position: -14
+Frame: 2
+
+Outlier
+YLR192C
+Max value: 164.0
+Position: 544
+Frame: 2
+
+Outlier
+YLR249W
+Max value: 269.0
+Position: 1174
+Frame: 2
+
+Outlier
+YLR287C-A
+Max value: 181.0
+Position: -9
+Frame: 0
+
+Outlier
+YLR355C
+Max value: 92.0
+Position: 1131
+Frame: 0
+
+Outlier
+YLR409C
+Max value: 336.0
+Position: 1678
+Frame: 2
+
+Outlier
+YLR413W
+Max value: 168.0
+Position: 406
+Frame: 2
+
+Outlier
+YLR441C
+Max value: 72.0
+Position: 326
+Frame: 1
+
+Outlier
+YML131W
+Max value: 283.0
+Position: 84
+Frame: 0
+
+Outlier
+YML028W
+Max value: 95.0
+Position: -20
+Frame: 2
+
+Outlier
+YML026C
+Max value: 92.0
+Position: 194
+Frame: 1
+
+Outlier
+YML024W
+Max value: 95.0
+Position: 29
+Frame: 1
+
+Outlier
+YMR012W
+Max value: 77.0
+Position: 785
+Frame: 1
+
+Outlier
+YMR013W-A
+Max value: 4500.0
+Position: -4
+Frame: 1
+
+Outlier
+YMR067C
+Max value: 83.0
+Position: 644
+Frame: 1
+
+Outlier
+YMR120C
+Max value: 69.0
+Position: 1431
+Frame: 0
+
+Outlier
+YMR142C
+Max value: 107.0
+Position: 274
+Frame: 2
+
+Outlier
+YMR229C
+Max value: 162.0
+Position: 4097
+Frame: 1
+
+Outlier
+YMR230W
+Max value: 117.0
+Position: 73
+Frame: 2
+
+Outlier
+YMR242C
+Max value: 348.0
+Position: 267
+Frame: 0
+
+Outlier
+YMR307W
+Max value: 133.0
+Position: 896
+Frame: 1
+
+Outlier
+YNL236W
+Max value: 103.0
+Position: 2540
+Frame: 1
+
+Outlier
+YNL234W
+Max value: 68.0
+Position: 887
+Frame: 1
+
+Outlier
+YNL178W
+Max value: 198.0
+Position: 570
+Frame: 0
+
+Outlier
+YNL145W
+Max value: 125.0
+Position: -38
+Frame: 2
+
+Outlier
+YNL047C
+Max value: 762.0
+Position: 214
+Frame: 2
+
+Outlier
+YNL016W
+Max value: 152.0
+Position: 1248
+Frame: 0
+
+Outlier
+YOL126C
+Max value: 158.0
+Position: 1165
+Frame: 2
+
+Outlier
+YOL120C
+Max value: 256.0
+Position: 390
+Frame: 0
+
+Outlier
+YOL040C
+Max value: 101.0
+Position: 353
+Frame: 1
+
+Outlier
+YOR063W
+Max value: 179.0
+Position: 735
+Frame: 0
+
+Outlier
+YOR167C
+Max value: 94.0
+Position: 23
+Frame: 1
+
+Outlier
+YOR187W
+Max value: 78.0
+Position: 536
+Frame: 1
+
+Outlier
+YOR226C
+Max value: 77.0
+Position: -14
+Frame: 2
+
+Outlier
+YOR293W
+Max value: 207.0
+Position: 125
+Frame: 1
+
+Outlier
+YOR312C
+Max value: 142.0
+Position: 267
+Frame: 0
+
+Outlier
+YOR332W
+Max value: 153.0
+Position: -24
+Frame: 0
+
+Outlier
+YPL249C-A
+Max value: 72.0
+Position: 157
+Frame: 2
+
+Outlier
+YPL143W
+Max value: 384.0
+Position: 127
+Frame: 2
+
+Outlier
+YPL090C
+Max value: 86.0
+Position: 346
+Frame: 2
+
+Outlier
+YPR010C
+Max value: 104.0
+Position: 3452
+Frame: 1
+
+Outlier
+YPR088C
+Max value: 102.0
+Position: 1048
+Frame: 2
+
+Outlier
+YPR102C
+Max value: 917.0
+Position: -29
+Frame: 2
+
+Outlier
+YPR145W
+Max value: 309.0
+Position: 464
+Frame: 1
+
+Outlier
+YPR187W
+Max value: 83.0
+Position: 38
+Frame: 1
+
