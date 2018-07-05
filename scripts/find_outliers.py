@@ -37,12 +37,12 @@ def fetch_vectors(filename):
             count_vectors.append(value_array[50:650])
 
     vector_array = np.vstack(count_vectors)
-    outlier = np.percentile(vector_array[vector_array > 10], 99.0)
+    outlier = np.percentile(vector_array[vector_array > 2], 99.0)
 
     for transcript in extend_gtf_frame(gtf_assembly_pickle):
         value_array = transcript.get_counts(alignments)
         if np.max(value_array) > outlier:
-            with open("outliers.txt", "a") as wh:
+            with open("outliers_t5.txt", "a") as wh:
                 wh.write("Outlier" + "\n")
                 wh.write(str(transcript.get_name()) + "\n")
                 wh.write("Max value: " + str(np.max(value_array)) +"\n")
@@ -51,7 +51,7 @@ def fetch_vectors(filename):
                 for r in range(0, 3):
                     if (argpos + r)%3 == 0:
                         wh.write("Frame: " + str(r) + "\n" + "\n")
-                        if r !=0:
+                        if r !=0 and argpos > 1:
                             with open ("outlier_ids_t5.txt", "a") as whl:
                                 whl.write(str(transcript.get_name()) + "\n")
 
@@ -59,6 +59,6 @@ def fetch_vectors(filename):
 gene_set_path = "/home/maria/Documents/pelechanolab/scripts/coding_list.txt"
 genome_fasta_path = "/home/maria/Documents/pelechanolab/data/R64e/genome.fa"
 gtf_assembly_pickle = "gtf_assembled.sav"
-bam_file_path = "/home/maria/Documents/pelechanolab/data/samples/20160909YP_08-39666715/cutadapt/umitools/star/BY4741-t5-1_S8_L002_R1_001.fastqAligned.sortedByCoord.out.bam"
+bam_file_path = "/home/maria/Documents/pelechanolab/data/samples/20160909YP_08-39666715/cutadapt/umitools/star/dedup/BY4741-t5-1_S8_L002_R1_001.fastqAligned.sortedByCoord.out.bam"
 offset = 50
 fetch_vectors(bam_file_path)

@@ -6,7 +6,6 @@ mkdir umitools
 
 for f in *.fastq; do umi_tools extract --bc-pattern NNNNNNNN --stdin $f --stdout umitools/$f -L logfile_$f.txt; done
 
-
 cd umitools
 mkdir fastqc
 
@@ -19,7 +18,8 @@ cd star
 for f in *.bam; do samtools index $f; done
 
 mkdir dedup
- for f in *.bam; do umi_tools dedup -I $f -S dedup/$f -L $f_log.txt --method="cluster"; done
+for f in *.bam; do umi_tools dedup -I $f -S dedup/$f -L $f_log.txt --method="cluster"; done
+
 cd dedup
 for f in *; do samtools index $f; done
 
