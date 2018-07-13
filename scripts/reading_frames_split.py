@@ -24,8 +24,8 @@ def fetch_vectors(filenames):
             if np.sum(value_array) < 50:
                 continue
             
-            value_array = np.concatenate((filler_array, value_array))
-            count_vectors.append(value_array[-600:])
+            value_array = np.concatenate((value_array, filler_array))
+            count_vectors.append(value_array[:600])
 
     print("Vectors retrieved!")
     vector_array = np.vstack(count_vectors)
@@ -55,7 +55,7 @@ def plot_results_coding():
     plt.plot(frame_0, linewidth=1, color="red", label="Frame 0" )
     plt.plot(frame_1, linewidth=1, color="blue", label ="Frame +1 (main)")
     plt.plot(frame_2, linewidth=1, color="green", label="Frame -1")
-    plt.savefig("frames_sliding_t0_all_reps_term.pdf")
+    plt.savefig("frames_sliding_t0_salt_all_reps_head.pdf")
     plt.close()
 
 
@@ -63,11 +63,11 @@ gene_set_path = "/home/maria/Documents/pelechanolab/scripts/coding_list.txt"
 genome_fasta_path = "/home/maria/Documents/pelechanolab/data/R64e/genome.fa"
 gtf_assembly_pickle = "gtf_assembled.sav"
 
-bam_file_path = "/home/maria/Documents/pelechanolab/data/samples/WT_ox_stress_experiment/cutadapt/umitools/star/dedup/BY4741-t0-2_S23.fastqAligned.sortedByCoord.out.bam"
-bam_file_path_2 = "/home/maria/Documents/pelechanolab/data/samples/WT_ox_stress_experiment_2/cutadapt/umitools/star/dedup/BY4741-t0-1_S7.fastqAligned.sortedByCoord.out.bam"
-bam_file_path_3 = "/home/maria/Documents/pelechanolab/data/samples/WT_ox_stress_experiment_3/cutadapt/umitools/star/dedup/BY4741-t0-3_S15.fastqAligned.sortedByCoord.out.bam"
+bam_file_path = "/home/maria/Documents/pelechanolab/data/samples/salt_stress/cutadapt/umitools/star/dedup/wt-0-R1_S1.fastqAligned.sortedByCoord.out.bam"
+#bam_file_path_2 = "/home/maria/Documents/pelechanolab/data/samples/salt_stress/cutadapt/umitools/star/dedup/wt-30-R1_S2.fastqAligned.sortedByCoord.out.bam"
+#bam_file_path_3 = "/home/maria/Documents/pelechanolab/data/samples/WT_ox_stress_experiment_3/cutadapt/umitools/star/dedup/BY4741-t0-3_S15.fastqAligned.sortedByCoord.out.bam"
 
-bam_files_merged = [bam_file_path, bam_file_path_2, bam_file_path_3]
+bam_files_merged = [bam_file_path]
 
 offset = 50
 

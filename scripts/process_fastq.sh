@@ -12,7 +12,8 @@ mkdir fastqc
 for f in *.fastq; do fastqc $f -o ./fastqc ; done
 
 mkdir star
-for f in *.fastq; do sudo STAR --runThreadN 4 --readFilesIn $f --genomeDir ../../../../R64e/genomedir --outSAMtype BAM SortedByCoordinate  --outFilterMismatchNoverReadLmax 0.04 --outFileNamePrefix star/$f --outFilterMultimapNmax 1 --alignIntronMax 1000; done
+for f in *.fastq; do sudo STAR --runThreadN 4 --readFilesIn $f --genomeDir ../../../b_subtilis/6633/ --outSAMtype BAM SortedByCoordinate  --outFileNamePrefix star/$f --outFilterMultimapNmax 1 --alignIntronMax 100; done
+
 
 cd star
 for f in *.bam; do samtools index $f; done

@@ -52,3 +52,4 @@ scripts/R*
 _STARgenome*
 *.log
 data*
+BLAST*
