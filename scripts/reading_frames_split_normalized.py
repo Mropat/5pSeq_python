@@ -1,4 +1,4 @@
-# Script for analyzing and plotting the ribosome protection 
+# Script for analsis and plotting the ribosome protection 
 
 import numpy as np
 from plastid import *
@@ -73,26 +73,32 @@ def fetch_vectors(filenames):
 # If vectors are going to be analyzed for frame protection,
 # It is necessary to make sure the vector length is divisible by 3
 
+    except_count = 0
     count_vectors = []
     for transcript in gtf_coords_file:
         if transcript.attr.get('Name') in allowed_ids:
-            value_array = transcript.get_counts(alignments)
-            if np.sum(value_array[-1800:]) > 1:
-#            if np.sum(value_array[:1800]) > 1:
-#                count_vectors.append(np.concatenate((value_array, np.zeros(4000, dtype=int)))[:1800])
-                count_vectors.append(np.concatenate((np.zeros(4000, dtype=int), value_array))[-1800:])
+            try: 
+                value_array = transcript.get_counts(alignments)
+    #            if np.sum(value_array[-1800:]) > 1:
+    #                count_vectors.append(np.concatenate((np.zeros(4000, dtype=int), value_array))[-1800:])
+                if np.sum(value_array[:1800]) > 1:
+                    count_vectors.append(np.concatenate((value_array, np.zeros(4000, dtype=int)))[:1800])
+            except ValueError:
+                except_count += 1
 
 
     vector_array = np.vstack(count_vectors)
+
     print("Vectors retrieved!")
+    print("Removed %i transcripts!"%except_count)
 
 #This normalizes vectors by read (optional) 
-    vector_normsum = np.sum(vector_array, axis=1)
-    vector_array_normalized = vector_array / vector_normsum[:, np.newaxis]
+#    vector_normsum = np.sum(vector_array, axis=1)
+#    vector_array_normalized = vector_array / vector_normsum[:, np.newaxis]
 
 
 #This creates a metagene from all retrieved vectors
-    metagene = vector_array_normalized.sum(axis=0)
+    metagene = vector_array.sum(axis=0)
 
 # Vectors are split into 3 frames for ribosome protection analysis
     metagene_stack = np.reshape(metagene, (-1, 3))
@@ -110,9 +116,6 @@ def fetch_vectors(filenames):
     return frames
 
 
-
-
-
 def plot_results_coding(bam_files_merged, filename):
     ''' 
     Plots each frame. If sequence boundries are not modified, frame 1 is the one producing
@@ -125,14 +128,15 @@ def plot_results_coding(bam_files_merged, filename):
     plt.plot(frames[0], linewidth=1, color="red", label="Frame 0")
     plt.plot(frames[1], linewidth=1, color="blue", label="Frame +1 (main)")
     plt.plot(frames[2], linewidth=1, color="green", label="Frame -1")
-    plt.savefig("normalized_coding/b_sub_tails/b_sub_frames_sliding_%s_global_tail.pdf" % filename)
+    plt.savefig("count_coding/b_sub_heads/b_sub_frames_sliding_%s_global_head.pdf" % filename)
     plt.close()
 
 
 # Paths to genome coordinate file, allowed id set
 gene_set_path = "/home/maria/Documents/pelechanolab/coding_bsub_6633.txt"
 gtf_assembly_pickle = "/home/maria/Documents/pelechanolab/gtf_assembled_bsub_6633.sav"
-offset = 0
+offset = 50
+sample_directory = "/home/maria/Documents/pelechanolab/data/samples/ATCC6633/cutadapt/umitools/star/dedup"
 
 # fetches sample names from directory in which we analyze for plot labeling
 def runall_samples(directory):
@@ -146,7 +150,7 @@ def runall_samples(directory):
 
 def gogo():    
     proc = []
-    directory = "/home/maria/Documents/pelechanolab/data/samples/ATCC6633/cutadapt/umitools/star/dedup"
+    directory = sample_directory
     for bampath, bamname in runall_samples(directory):        
         proc.append(Process(target=plot_results_coding, args=(bampath, bamname)))
 
@@ -155,6 +159,6 @@ def gogo():
     for p in proc:
         p.join()
 
-# gogo()
+gogo()
 
-print(help(plot_results_coding))
+

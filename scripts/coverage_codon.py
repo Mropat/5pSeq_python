@@ -6,13 +6,13 @@ from plastid import *
 import dill
 import matplotlib
 import matplotlib.pyplot as plt
+from multiprocessing import Process, Pool
+import os
+import argparse
+import sys
 
-# This part extends the boundries of the transcript by chosen amount of bases. 
-# This is the easiest way to do this and retain all transcript information. 
-# If the boundries are expanded beyond what is indexed in BAM file, 
-# script may produce error when trying to retrieve coverage at later stage
 
-def extend_gtf_frame(pickle):    
+def extend_gtf_frame(pickle):
     gtf_coords_file = list(dill.load(open(pickle, "rb")))
     for transcript in gtf_coords_file:
         span = transcript.spanning_segment
@@ -23,9 +23,6 @@ def extend_gtf_frame(pickle):
         transcript.add_segments(new_region, new_region_2)
         yield transcript
 
-# This is a necessary additional step to map genome fasta coordinates to 
-# transcript coordinates. Plastid can read the dictionary this returns to 
-# retrieve vectors around a specific codon
 
 def match_coords_to_seq(filename):
     fasta_dict = {}
@@ -36,89 +33,154 @@ def match_coords_to_seq(filename):
         for line in genomelines:
             if line.startswith(">"):
                 fasta_dict[chrom] = genseq
-                chrom = line.strip()[1:]
+                chrom = line.strip().split(" ")[0][1:]
                 genseq = ""
             else:
                 genseq = genseq + line.strip()
         fasta_dict[chrom] = genseq
     return fasta_dict
-    
 
-# Reads a file with line separated transcript id. Any group of transcripts can be analyzed
-# In this instance allows only protein coding transcripts in the list to be analyzed
 
-def allowed_transcript_ids(filename):    
+def allowed_transcript_ids(filename):
     with open(filename, "r") as gene_list_file:
         return gene_list_file.read().splitlines()
 
 
-
-def fetch_vectors(filename, filename_cont):
-    
-# Genomic coordinates provided for transcript
+def fetch_vectors(filename):
     fasta_dict = match_coords_to_seq(genome_fasta_path)
-
-# Allowed id (in this case only coding transcripts in the list)
     allowed_ids = set(allowed_transcript_ids(gene_set_path))
-
-# Alignments loaded from 2 BAM files (_cont = control samples or t0 for peroxide)
     alignments = BAMGenomeArray(filename, mapping=FivePrimeMapFactory())
-    alignments_cont = BAMGenomeArray(filename_cont, mapping=FivePrimeMapFactory())
-
-    count_vectors = []
-    count_vectors_cont = []
+    codon_dict = {}
+    print("Genomes loaded")
 
     for transcript in extend_gtf_frame(gtf_assembly_pickle):
-        
-# check if transcript is coding:
-        if transcript.get_name() in allowed_ids:
-# retrieve fasta sequence (already spliced in exons present)
-            readseq = transcript.get_sequence(fasta_dict)
-# retrieves codons in the sequence in appropriate, coding frame (note the 3)
-            for ind in range(offset, len(readseq)-offset, 3):
-                codon = readseq[ind] + readseq[ind+1] + readseq[ind+2]
-# finds a specific codon we are interested in (could also iterate over all possible codons)
-# retrieves vector 50 positions around the codon(can be changed), so we can plot metagene codon preference
-                if codon == "CCG":
-                    count_vectors.append(transcript.get_counts(alignments)[ind-50:ind+50])
-                    count_vectors_cont.append(transcript.get_counts(alignments_cont)[ind-50:ind+50])
+        if transcript.attr.get('Name') in allowed_ids:
+            try:
+                # Necessary! Exception if out of bounds
+                transcript.get_counts(alignments)
+                readseq = transcript.get_sequence(fasta_dict)
 
-    vector_array = np.vstack(count_vectors)
-    vector_array_cont = np.vstack(count_vectors_cont)
+                for ind in range(offset+3, len(readseq)-offset, 3):
+                    codon = readseq[ind] + readseq[ind+1] + readseq[ind+2]
+                    if codon not in codon_dict:
+                        codon_dict[codon] = np.atleast_2d(
+                            transcript.get_counts(alignments)[ind-offset:ind+offset])
+                    else:
+                        codon_dict[codon] = np.concatenate((codon_dict[codon], np.atleast_2d(
+                            transcript.get_counts(alignments)[ind-offset:ind+offset])), axis=0)
+            except ValueError:
+                pass
 
-    metagene = vector_array.sum(axis=0)
-    metagene_cont = vector_array_cont.sum(axis=0)
+    for key in codon_dict:
+        codon_dict[key] = codon_dict[key].sum(axis=0)
+    print("file processed")
 
-    return metagene, metagene_cont
+    return codon_dict
 
-# Custom scale labels to display teh proper 0 point where the codon is
-def scale_labels():    
+
+def scale_labels():
     xlabels = []
-    for x in range(-49, 49):
+    for x in range(-offset, offset):
         if x % 10 == 0:
             xlabels.append(x)
         else:
             xlabels.append(" ")
     return xlabels
 
-def plot_results_start(metagene, metagene_cont):    
+
+def plot_results_start(bam_file_path, bamname):
+    codon_dict = fetch_vectors(bam_file_path)
     labels = scale_labels()
-    plt.grid(True, alpha=0.3)
-    plt.step(np.linspace(-49, 51, num=100), metagene, linewidth=0.5, color="red")
-    plt.step(np.linspace(-49, 51, num=100), metagene_cont, linewidth=0.5, color="blue")
-    plt.xticks(np.linspace(-49, 51, num=100), labels, size="xx-small")
-    plt.savefig("codon_coverage.pdf")
-    plt.close()
-    print("Peak at: " + str(metagene.argmax() - (offset)))
 
-# Paths to files used
+    for key in codon_dict:
+
+        plt.title(("Peak at: " + str(codon_dict[key].argmax() - (offset))))
+        plt.grid(True, alpha=0.2)
+        plt.step(np.linspace(-offset, offset, num=offset*2),
+                 codon_dict[key], linewidth=0.5, color="red")
+        plt.xticks(np.linspace(-offset, offset, num=offset*2),
+                   labels, size="xx-small")
+        plt.savefig("plots/l_plan_codons/%s/codon_coverage_%s.pdf" %
+                    (bamname, key))
+        plt.close()
+
+        print("Peak at: " + str(codon_dict[key].argmax() - (offset)))
+
+    for key in aa_dict:
+        collapsed_codons = []
+
+        for x in aa_dict[key]:
+            collapsed_codons.append(np.atleast_2d(codon_dict[x]))
+
+        collapsed_aa = np.vstack(collapsed_codons).sum(axis=0)
+
+        plt.title(("Peak at: " + str(collapsed_aa.argmax() - (offset))))
+        plt.grid(True, alpha=0.2)
+        plt.step(np.linspace(-offset, offset, num=offset*2),
+                 collapsed_aa, linewidth=0.5, color="red")
+        plt.xticks(np.linspace(-offset, offset, num=offset*2),
+                   labels, size="xx-small")
+        plt.savefig("plots/l_plan_aa/%s/codon_coverage_%s.pdf" %
+                    (bamname, key))
+        plt.close()
+
+
+# Paths and args to files used
 offset = 50
-genome_fasta_path = "/home/maria/Documents/pelechanolab/data/R64e/genome.fa"
-gtf_assembly_pickle = "gtf_assembled.sav"
-bam_file_path = "/home/maria/Documents/pelechanolab/data/samples/2/post-proc/by14_clu_dedup_nomm.bam"
-bam_file_cont_path = "/home/maria/Documents/pelechanolab/data/samples/20160909YP_08-39666715/cutadapt/umitools/star/dedup/BY4741-t5-1_S8_L002_R1_001.fastqAligned.sortedByCoord.out.bam"
-gene_set_path = "/home/maria/Documents/pelechanolab/scripts/coding_list.txt"
+cores = 4
+sample_directory = "/home/maria/Documents/pelechanolab/data/samples/ATCC8014/umitools/star/dedup"
+genome_fasta_path = "/home/maria/Documents/pelechanolab/data/l_plan/GCA_002631775.1_ASM263177v1_genomic.fna"
+gtf_assembly_pickle = "/home/maria/Documents/pelechanolab/gtf_assembled_l_plan8014.sav"
+gene_set_path = "/home/maria/Documents/pelechanolab/coding_lplan8014.txt"
 
 
-metagene, metagene_cont = fetch_vectors(bam_file_path, bam_file_cont_path)
-plot_results_start(metagene, metagene_cont)
+aa_dict = {
+    "ALA": ["GCT", "GCC", "GCA", "GCG"],
+    "ARG": ["CGT", "CGC", "CGA", "CGG", "AGA", "AGG"],
+    "ASN": ["AAT", "AAC"],
+    "ASP": ["GAT", "GAC"],
+    "CYS": ["TGT", "TGC"],
+    "GLN": ["TGT", "TGC"],
+    "GLU": ["TGT", "TGC"],
+    "GLY": ["GGT", "GGC", "GGA", "GGG"],
+    "HIS": ["CAT", "CAC"],
+    "ILE": ["ATT", "ATC", "ATA"],
+    "LEU": ["TTA", "TTG", "CTT", "CTC", "CTA", "CTG"],
+    "LYS": ["AAA", "AAG"],
+    "PHE": ["TTT", "TTC"],
+    "PRO": ["CCT", "CCC", "CCA", "CCG"],
+    "SER": ["TCT", "TCC", "TCA", "TCG", "AGT", "AGC"],
+    "THR": ["ACT", "ACC", "ACA", "ACG"],
+    "TRP": ["TGG"],
+    "TYR": ["TAT", "TAC"],
+    "VAL": ["GTT", "GTC", "GTA", "GTG"],
+    "TERM": ["TAA", "TGA", "TAG"],
+    "MET": ["ATG"]}
+
+
+def runall_samples(directory):
+    for filename in os.listdir(directory):
+        if filename.endswith(".bam"):
+            yield os.path.join(directory, filename), filename[:5]
+
+
+def gogo():
+    pool = Pool(processes=cores)
+    args = []
+    for bampath, bamname in runall_samples(sample_directory):
+        try:
+            os.mkdir("plots/l_plan_aa/" + bamname)
+            os.mkdir("plots/l_plan_codons/" + bamname)
+        except:
+            pass
+        args.append((bampath, bamname))
+
+    pool.starmap_async(plot_results_start, args)
+    pool.close()
+    pool.join()
+
+
+gogo()
+
+
+
