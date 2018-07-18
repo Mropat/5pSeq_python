@@ -57,17 +57,17 @@ def fetch_vectors(filename):
         if transcript.attr.get('Name') in allowed_ids:
             try:
                 # Necessary! Exception if out of bounds
-                transcript.get_counts(alignments)
+                readvec = transcript.get_counts(alignments)
                 readseq = transcript.get_sequence(fasta_dict)
 
                 for ind in range(offset+3, len(readseq)-offset, 3):
                     codon = readseq[ind] + readseq[ind+1] + readseq[ind+2]
                     if codon not in codon_dict:
                         codon_dict[codon] = np.atleast_2d(
-                            transcript.get_counts(alignments)[ind-offset:ind+offset])
+                            readvec[ind-offset:ind+offset])
                     else:
                         codon_dict[codon] = np.concatenate((codon_dict[codon], np.atleast_2d(
-                            transcript.get_counts(alignments)[ind-offset:ind+offset])), axis=0)
+                            readvec[ind-offset:ind+offset])), axis=0)
             except ValueError:
                 pass
 
@@ -165,6 +165,7 @@ def runall_samples(directory):
 
 
 def gogo():
+
     pool = Pool(processes=cores)
     args = []
     for bampath, bamname in runall_samples(sample_directory):
