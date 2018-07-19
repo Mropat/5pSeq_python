@@ -1,5 +1,5 @@
 import numpy as np
-from plastid import *
+from plastid import GTF2_TranscriptAssembler, GFF3_TranscriptAssembler, Transcript, GenomicSegment, BAMGenomeArray, FivePrimeMapFactory
 import dill
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,23 +9,29 @@ import sys
 import multiprocessing
 from multiprocessing import Process, Pool
 
+
 def create_assembly_dill(annotation_file):
     if annotation_file.endswith("gtf"):
-        gtf_file = list(GTF2_TranscriptAssembler(annotation_file, return_type=Transcript))
-        dill.dump(gtf_file, open(global_args.output_dir + annotation_file[:-4].split("/")[-1] +".sav", "wb"))
+        gtf_file = list(GTF2_TranscriptAssembler(
+            annotation_file, return_type=Transcript))
+        dill.dump(gtf_file, open(global_args.output_dir +
+                  annotation_file[:-4].split("/")[-1] + ".sav", "wb"))
     elif annotation_file.endswith("gff"):
-        gff_file = list(GFF3_TranscriptAssembler(annotation_file, return_type=Transcript))
-        dill.dump(gff_file, open(global_args.output_dir + annotation_file[:-4].split("/")[-1] +".sav", "wb"))
+        gff_file = list(GFF3_TranscriptAssembler(
+            annotation_file, return_type=Transcript))
+        dill.dump(gff_file, open(global_args.output_dir +
+                  annotation_file[:-4].split("/")[-1] + ".sav", "wb"))
 
 
 def extend_gtf_frame(pickle):
 
-    pickle_path = global_args.output_dir + global_args.annotation_file[:-4].split("/")[-1] +".sav"
+    pickle_path = global_args.output_dir + \
+        global_args.annotation_file[:-4].split("/")[-1] + ".sav"
 
     if os.path.isfile(pickle_path) == False:
         create_assembly_dill(global_args.annotation_file)
     gtf_coords_file = list(dill.load(open(pickle_path, "rb")))
-    
+
     for transcript in gtf_coords_file:
         span = transcript.spanning_segment
         new_region = GenomicSegment(
@@ -52,24 +58,24 @@ def fetch_vectors(filename):
     count_vectors_term = []
 
     for transcript in extend_gtf_frame(global_args.annotation_file):
-        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding"]):
+        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding", transcript.get_name() in allowed_ids]):
             try:
-                value_array = transcript.get_counts(alignments)
+                value_array=transcript.get_counts(alignments)
                 count_vectors.append(value_array[:global_args.offset*2])
                 count_vectors_term.append(value_array[-global_args.offset*2:])
             except ValueError:
                 pass
 
-    vector_array = np.vstack(count_vectors)
-    vector_array_term = np.vstack(count_vectors_term)
-    metagene = vector_array.sum(axis=0)
-    metagene_term = vector_array_term.sum(axis=0)
+    vector_array=np.vstack(count_vectors)
+    vector_array_term=np.vstack(count_vectors_term)
+    metagene=vector_array.sum(axis=0)
+    metagene_term=vector_array_term.sum(axis=0)
 
     return metagene, metagene_term
 
 
 def scale_labels():
-    xlabels = []
+    xlabels=[]
     for x in range(-global_args.offset, global_args.offset):
         if x % 10 == 0:
             xlabels.append(x)
@@ -79,8 +85,8 @@ def scale_labels():
 
 
 def plot_results_start(bampath, bamname):
-    metagene = fetch_vectors(bampath)
-    labels = scale_labels()
+    metagene=fetch_vectors(bampath)
+    labels=scale_labels()
 
     plt.grid(True, alpha=0.3)
     plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
@@ -105,12 +111,11 @@ def plot_results_start(bampath, bamname):
 def runall_samples(directory):
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
-            yield os.path.join(directory, filename), filename[-4:]
+            yield os.path.join(directory, filename), filename[:-4]
 
 def executable():
-
-    pool = Pool(processes=global_args.cores)
-    thread_args = []
+    pool=Pool(processes=global_args.cores)
+    thread_args=[]
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
             os.mkdir(global_args.output_dir + "coverage_start/")
@@ -131,13 +136,11 @@ def executable_2():
             os.mkdir(global_args.output_dir + "coverage_term/")
         except:
             pass
-        
+
         plot_results_start(bampath, bamname)
 
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser=argparse.ArgumentParser()
     parser.add_argument("--sample_dir", required=True)
     parser.add_argument("--genome_fasta")
     parser.add_argument("--annotation_file", required=True)
@@ -145,6 +148,8 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, default=2)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")
-    global_args = parser.parse_args()
-    executable()
-
+    global_args=parser.parse_args()
+    if global_args.cores == 1:
+        executable_2()
+    else:
+        executable()

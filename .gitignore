@@ -54,3 +54,6 @@ _STARgenome*
 data*
 BLAST*
 plots*
+scripts/troubleshooting*
+__pycache__*
+scripts/__pycache__*
