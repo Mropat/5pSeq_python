@@ -73,11 +73,12 @@ def fetch_vectors(filename):
     allowed_ids = set(allowed_transcript_ids(global_args.gene_set))
     alignments = BAMGenomeArray(filename, mapping=FivePrimeMapFactory())
     codon_dict = {}
+    out_range_count = 0
 
     print("Genomes loaded for %s " % filename)
 
     for transcript in extend_gtf_frame(global_args.annotation_file):
-        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding", transcript.get_name() in allowed_ids]):
+        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding"]):
             try:
                 # Necessary! Exception if out of bounds
                 readvec = transcript.get_counts(alignments)
@@ -92,8 +93,8 @@ def fetch_vectors(filename):
                         codon_dict[codon] = np.concatenate((codon_dict[codon], np.atleast_2d(
                             readvec[ind-global_args.offset:ind+global_args.offset])), axis=0)
             except ValueError:
-                pass
-
+                out_range_count += 1
+    print ("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
     for key in codon_dict:
         codon_dict[key] = codon_dict[key].sum(axis=0)
     print("Codons gathered for %s" % filename)
@@ -150,7 +151,7 @@ def plot_results_start(bam_file_path, bamname):
 def runall_samples(directory):
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
-            yield os.path.join(directory, filename), filename[:-4]
+            yield os.path.join(directory, filename), filename.split(".")[0]
 
 
 def executable():
@@ -159,10 +160,8 @@ def executable():
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + global_args.input_dir.split("/")
-                     [-1] + "coverage_amino_acid/%s" % bamname)
-            os.mkdir(global_args.output_dir + global_args.input_dir.split("/")
-                     [-1] + "coverage_codon/%s" % bamname)
+            os.mkdir(global_args.output_dir + "coverage_amino_acid/%s" % bamname)
+            os.mkdir(global_args.output_dir + "coverage_codon/%s" % bamname)
         except:
             pass
         thread_args.append((bampath, bamname))
@@ -176,10 +175,8 @@ def executable_2():
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + global_args.input_dir.split("/")
-                     [-1] + "/coverage_amino_acid/%s" % bamname)
-            os.mkdir(global_args.output_dir + global_args.input_dir.split("/")
-                     [-1] + "/coverage_codon/%s" % bamname)
+            os.mkdir(global_args.output_dir + "coverage_amino_acid/%s" % bamname)
+            os.mkdir(global_args.output_dir + "coverage_codon/%s" % bamname)
         except:
             pass
 
@@ -215,18 +212,15 @@ if __name__ == "__main__":
     parser.add_argument("--sample_dir", required=True)
     parser.add_argument("--genome_fasta", required=True)
     parser.add_argument("--annotation_file", required=True)
-    parser.add_argument("--global_args.offset", type=int, default=50)
-    parser.add_argument("--cores", type=int, default=2)
+    parser.add_argument("--offset", type=int, default=50)
+    parser.add_argument("--cores", type=int, default=4)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")
     global_args = parser.parse_args()
 
     try:
-        os.mkdir(global_args.output_dir + global_args.input_dir.split("/")[-1])
-        os.mkdir(global_args.output_dir +
-                 global_args.input_dir.split("/")[-1] + "/coverage_amino_acid/")
-        os.mkdir(global_args.output_dir +
-                 global_args.input_dir.split("/")[-1] + "/coverage_codon/")
+        os.mkdir(global_args.output_dir + "coverage_amino_acid")
+        os.mkdir(global_args.output_dir +"coverage_codon")
     except:
         pass
 
