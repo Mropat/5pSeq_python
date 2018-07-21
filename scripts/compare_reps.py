@@ -68,15 +68,19 @@ def fetch_vectors(filename):
 
     vector_array=np.vstack(count_vectors)
     vector_array_term=np.vstack(count_vectors_term)
+
+    if global_args.normalize == True:
+            vector_array = vector_array / vector_array.sum(1)[:, np.newaxis]
+            vector_array_term = vector_array / vector_array.sum(1)[:, np.newaxis]
+
     metagene=vector_array.sum(axis=0)
     metagene_term=vector_array_term.sum(axis=0)
 
     return metagene, metagene_term
 
-
 def scale_labels():
-    xlabels=[]
-    for x in range(-global_args.offset, global_args.offset):
+    xlabels = []
+    for x in range(-global_args.offset+1, global_args.offset+1):
         if x % 10 == 0:
             xlabels.append(x)
         else:
@@ -111,7 +115,7 @@ def plot_results_start(bampath, bamname):
 def runall_samples(directory):
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
-            yield os.path.join(directory, filename), filename[:-4]
+            yield os.path.join(directory, filename), filename.split(".")[0]
 
 def executable():
     pool=Pool(processes=global_args.cores)
@@ -148,6 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, default=2)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")
+    parser.add_argument("--normalize", type=bool, default=False)
     global_args=parser.parse_args()
     if global_args.cores == 1:
         executable_2()

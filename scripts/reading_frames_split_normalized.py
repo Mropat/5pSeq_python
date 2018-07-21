@@ -121,21 +121,21 @@ def plot_results_start(bampath, bamname):
     plt.plot(frames[0][0], linewidth=1, color="red", label="Frame 0")
     plt.plot(frames[0][1], linewidth=1, color="blue", label="Frame +1 (main)")
     plt.plot(frames[0][2], linewidth=1, color="green", label="Frame -1")
-    plt.savefig("count_coding/b_sub_heads/b_sub_frames_sliding_%s_global_start.pdf" % bamname)
+    plt.savefig( global_args.output_dir + "frames_coverage_start/ribosome_protection_%s.pdf" % bamname)
     plt.close()
 
     plt.grid(True, alpha=0.3)
     plt.plot(frames[1][0], linewidth=1, color="red", label="Frame 0")
     plt.plot(frames[1][1], linewidth=1, color="blue", label="Frame +1 (main)")
     plt.plot(frames[1][2], linewidth=1, color="green", label="Frame -1")
-    plt.savefig("count_coding/b_sub_heads/b_sub_frames_sliding_%s_global_term.pdf" % bamname)
+    plt.savefig(global_args.output_dir + "frames_coverage_term/ribosome_protection_%s.pdf" % bamname)
     plt.close()
 
 
 def runall_samples(directory):
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
-            yield os.path.join(directory, filename), filename[:5]
+            yield os.path.join(directory, filename), filename.split(".")[0]
     
 
 def executable():

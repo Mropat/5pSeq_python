@@ -85,7 +85,7 @@ def fetch_vectors(filename):
                 readseq = transcript.get_sequence(fasta_dict)
 
                 for ind in range(global_args.offset+3, len(readseq)-global_args.offset, 3):
-                    codon = readseq[ind] + readseq[ind+1] + readseq[ind+2]
+                    codon = readseq[ind:ind+3]
                     if codon not in codon_dict:
                         codon_dict[codon] = np.atleast_2d(
                             readvec[ind-global_args.offset:ind+global_args.offset])
@@ -96,6 +96,8 @@ def fetch_vectors(filename):
                 out_range_count += 1
     print ("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
     for key in codon_dict:
+        if global_args.normalize == True:
+            codon_dict[key] = codon_dict[key] / codon_dict[key].sum(1)[:, np.newaxis]
         codon_dict[key] = codon_dict[key].sum(axis=0)
     print("Codons gathered for %s" % filename)
 
@@ -104,7 +106,7 @@ def fetch_vectors(filename):
 
 def scale_labels():
     xlabels = []
-    for x in range(-global_args.offset, global_args.offset):
+    for x in range(-global_args.offset+1, global_args.offset+1):
         if x % 10 == 0:
             xlabels.append(x)
         else:
@@ -191,8 +193,8 @@ if __name__ == "__main__":
         "ASN": ["AAT", "AAC"],
         "ASP": ["GAT", "GAC"],
         "CYS": ["TGT", "TGC"],
-        "GLN": ["TGT", "TGC"],
-        "GLU": ["TGT", "TGC"],
+        "GLN": ["CAA", "CAG"],
+        "GLU": ["GAA", "GAG"],
         "GLY": ["GGT", "GGC", "GGA", "GGG"],
         "HIS": ["CAT", "CAC"],
         "ILE": ["ATT", "ATC", "ATA"],
@@ -216,6 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, default=4)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")
+    parser.add_argument("--normalize", type=bool, default=False)
     global_args = parser.parse_args()
 
     try:
