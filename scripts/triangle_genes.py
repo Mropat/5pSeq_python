@@ -13,7 +13,6 @@ import pandas as pd
 from plastid import plotting
 from plastid.plotting.plots import *
 
-
 def create_assembly_dill(annotation_file):
     if annotation_file.endswith("gtf"):
         gtf_file = list(GTF2_TranscriptAssembler(
@@ -47,24 +46,35 @@ def fetch_vectors(filename):
     print("Genomes loaded for %s " % filename)
 
     vector_array = []
+    name_array = []
 
     for transcript in gtf_coords_file:
         if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding"]):
             readvec = transcript.get_counts(alignments)
-            if np.sum(readvec) > 100 and len(readvec)%3 ==0:
+            if np.sum(readvec) > 30 and len(readvec) % 3 == 0:
+                if global_args.annotation_file.endswith("gtf"):
+                    name_array.append(transcript.get_name())
+                elif global_args.annotation_file.endswith("gff"):
+                    name_array.append(transcript.attr.get('Name'))
                 readvec = np.reshape(readvec, (-1, 3))
                 vector_array.append(np.sum(readvec, axis=0))
 
     vector_array = np.vstack(vector_array)
-    vector_array = vector_array / vector_array.sum(1)[:, numpy.newaxis]
-    return vector_array
+    sum_array = vector_array.sum(1).T
+    vector_array = vector_array / vector_array.sum(1)[:, np.newaxis]
+
+    return vector_array, name_array
 
 
 def plot_results_start(bampath, bamname):
     metagene = fetch_vectors(bampath)
 
-    fig, ax = triangle_plot(metagene, grid=[
-                            0.5, 0.75], marker=".", linewidth=0.1, alpha=0.2, vertex_labels=["A", "B", "C"])
+    fig, ax = triangle_plot(metagene[0], grid=[0.5, 0.75], marker=".", linewidth=0.01, alpha=0.5, vertex_labels=["0", "+1", "-1"])
+
+    """tri_metag = trianglize(metagene[0])
+    for i, name in enumerate(metagene[1]):
+        if np.max(metagene[0][i]) + 1-(np.max(metagene[0][i]) + np.min(metagene[0][i])) > 0.875:
+            ax.annotate(name, tri_metag[i], xytext=tri_metag[i], size=2)"""
 
     plt.title("frame preference in %s" % bamname)
 

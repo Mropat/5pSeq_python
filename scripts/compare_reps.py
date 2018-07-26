@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import numpy as np
 from plastid import GTF2_TranscriptAssembler, GFF3_TranscriptAssembler, Transcript, GenomicSegment, BAMGenomeArray, FivePrimeMapFactory
 import dill
@@ -58,7 +60,7 @@ def fetch_vectors(filename):
     count_vectors_term = []
 
     for transcript in extend_gtf_frame(global_args.annotation_file):
-        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding", transcript.get_name() in allowed_ids]):
+        if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             try:
                 value_array=transcript.get_counts(alignments)
                 count_vectors.append(value_array[:global_args.offset*2])
@@ -70,7 +72,9 @@ def fetch_vectors(filename):
     vector_array_term=np.vstack(count_vectors_term)
 
     if global_args.normalize == True:
+            vector_array = vector_array[~np.all(vector_array == 0, axis=1)]
             vector_array = vector_array / vector_array.sum(1)[:, np.newaxis]
+            vector_array_term = vector_array_term[~np.all(vector_array_term == 0, axis=1)]
             vector_array_term = vector_array / vector_array.sum(1)[:, np.newaxis]
 
     metagene=vector_array.sum(axis=0)
@@ -91,24 +95,28 @@ def scale_labels():
 def plot_results_start(bampath, bamname):
     metagene=fetch_vectors(bampath)
     labels=scale_labels()
+    norm = ""
+    if global_args.normalize == True:
+        norm = "_norm"
 
+    plt.title(("Peak at: " + str(metagene[0].argmax() - (global_args.offset))))
     plt.grid(True, alpha=0.3)
     plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
              metagene[0], linewidth=0.5, label=bamname)
     plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                labels, size="xx-small")
     plt.legend()
-    plt.savefig(global_args.output_dir + "coverage_start/%s.pdf" % bamname)
+    plt.savefig(global_args.output_dir + "coverage_start/%s%s.pdf" % (bamname, norm))
     plt.close()
 
-
+    plt.title(("Peak at: " + str(metagene[1].argmax() - (global_args.offset))))
     plt.grid(True, alpha=0.3)
     plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
              metagene[1], linewidth=0.5, label=bamname)
     plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                labels, size="xx-small")
     plt.legend()
-    plt.savefig(global_args.output_dir + "coverage_term/%s.pdf" % bamname)
+    plt.savefig(global_args.output_dir + "coverage_term/%s%s.pdf" % (bamname, norm))
     plt.close()
 
 
@@ -116,6 +124,7 @@ def runall_samples(directory):
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
             yield os.path.join(directory, filename), filename.split(".")[0]
+
 
 def executable():
     pool=Pool(processes=global_args.cores)
@@ -145,7 +154,7 @@ def executable_2():
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("--sample_dir", required=True)
+    parser.add_argument("--sample_dir", required=True, help="Path to directory with samples")
     parser.add_argument("--genome_fasta")
     parser.add_argument("--annotation_file", required=True)
     parser.add_argument("--offset", type=int, default=50)

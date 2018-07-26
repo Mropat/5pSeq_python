@@ -65,11 +65,11 @@ def fetch_vectors(filenames):
         if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding", transcript.get_name() in allowed_ids]):
             try: 
                 value_array = transcript.get_counts(alignments)
-                if np.sum(value_array[-1800:]) > 1:
-                    count_vectors_term.append(np.concatenate((np.zeros(4000, dtype=int), value_array))[-1800:])
+                if np.sum(value_array[-1800-global_args.offset*2:]) > 1:
+                    count_vectors_term.append(np.concatenate((np.zeros(4000, dtype=int), value_array))[-1800-global_args.offset*2:])
 
-                if np.sum(value_array[:1800]) > 1:
-                    count_vectors_start.append(np.concatenate((value_array, np.zeros(4000, dtype=int)))[:1800])
+                if np.sum(value_array[:1800+global_args.offset*2]) > 1:
+                    count_vectors_start.append(np.concatenate((value_array, np.zeros(4000, dtype=int)))[:1800+global_args.offset*2])
             except ValueError:
                 except_count += 1
 
@@ -113,23 +113,26 @@ def fetch_vectors(filenames):
     return frames_start, frames_term
 
 
-def plot_results_start(bampath, bamname):
-   
+def plot_results_start(bampath, bamname):   
     frames = fetch_vectors(bampath)
+    norm = ""
+    if global_args.normalize == True:
+        norm = "_norm"
 
     plt.grid(True, alpha=0.3)
     plt.plot(frames[0][0], linewidth=1, color="red", label="Frame 0")
     plt.plot(frames[0][1], linewidth=1, color="blue", label="Frame +1 (main)")
     plt.plot(frames[0][2], linewidth=1, color="green", label="Frame -1")
-    plt.savefig( global_args.output_dir + "frames_coverage_start/ribosome_protection_%s.pdf" % bamname)
+    plt.savefig( global_args.output_dir + "frames_coverage_start/ribosome_protection_%s%s.pdf" % (bamname, norm))
     plt.close()
 
     plt.grid(True, alpha=0.3)
     plt.plot(frames[1][0], linewidth=1, color="red", label="Frame 0")
     plt.plot(frames[1][1], linewidth=1, color="blue", label="Frame +1 (main)")
     plt.plot(frames[1][2], linewidth=1, color="green", label="Frame -1")
-    plt.savefig(global_args.output_dir + "frames_coverage_term/ribosome_protection_%s.pdf" % bamname)
+    plt.savefig(global_args.output_dir + "frames_coverage_term/ribosome_protection_%s%s.pdf" % (bamname, norm))
     plt.close()
+
 
 
 def runall_samples(directory):
@@ -169,7 +172,7 @@ if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--sample_dir", required=True)
     parser.add_argument("--annotation_file", required=True)
-    parser.add_argument("--offset", type=int, default=50)
+    parser.add_argument("--offset", type=int, default=48)
     parser.add_argument("--cores", type=int, default=2)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")

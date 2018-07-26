@@ -12,6 +12,7 @@ import sys
 
 
 def create_assembly_dill(annotation_file):
+   
     if annotation_file.endswith("gtf"):
         gtf_file = list(GTF2_TranscriptAssembler(
             annotation_file, return_type=Transcript))
@@ -78,7 +79,7 @@ def fetch_vectors(filename):
     print("Genomes loaded for %s " % filename)
 
     for transcript in extend_gtf_frame(global_args.annotation_file):
-        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding"]):
+        if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             try:
                 # Necessary! Exception if out of bounds
                 readvec = transcript.get_counts(alignments)
@@ -97,6 +98,7 @@ def fetch_vectors(filename):
     print ("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
     for key in codon_dict:
         if global_args.normalize == True:
+            codon_dict[key] = codon_dict[key][~np.all(codon_dict[key] == 0, axis=1)]
             codon_dict[key] = codon_dict[key] / codon_dict[key].sum(1)[:, np.newaxis]
         codon_dict[key] = codon_dict[key].sum(axis=0)
     print("Codons gathered for %s" % filename)
@@ -118,6 +120,10 @@ def plot_results_start(bam_file_path, bamname):
     codon_dict = fetch_vectors(bam_file_path)
     labels = scale_labels()
 
+    norm = ""
+    if global_args.normalize == True:
+        norm = "_norm"
+
     for key in codon_dict:
 
         plt.title(
@@ -128,7 +134,7 @@ def plot_results_start(bam_file_path, bamname):
         plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                    labels, size="xx-small")
         plt.savefig(global_args.output_dir +
-                    "coverage_codon/%s/%s.pdf" % (bamname, key))
+                    "coverage_codon/%s/%s%s.pdf" % (bamname, key, norm))
         plt.close()
 
     for key in aa_dict:
@@ -146,7 +152,7 @@ def plot_results_start(bam_file_path, bamname):
         plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                    labels, size="xx-small")
         plt.savefig(global_args.output_dir +
-                    "coverage_amino_acid/%s/%s.pdf" % (bamname, key))
+                    "coverage_amino_acid/%s/%s%s.pdf" % (bamname, key, norm))
         plt.close()
 
 
@@ -224,6 +230,7 @@ if __name__ == "__main__":
     try:
         os.mkdir(global_args.output_dir + "coverage_amino_acid")
         os.mkdir(global_args.output_dir +"coverage_codon")
+
     except:
         pass
 
