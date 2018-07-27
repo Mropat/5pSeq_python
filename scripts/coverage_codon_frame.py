@@ -146,7 +146,7 @@ def plot_results_start(bam_file_path, bamname):
         plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                    labels, size="xx-small")
         plt.savefig(global_args.output_dir +
-                    "coverage_codon_frame%i/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
+                    "coverage_codon_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
         plt.close()
 
     for key in aa_dict:
@@ -164,7 +164,7 @@ def plot_results_start(bam_file_path, bamname):
         plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                    labels, size="xx-small")
         plt.savefig(global_args.output_dir +
-                    "coverage_amino_acid_frame%i/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
+                    "coverage_amino_acid_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
         plt.close()
 
 
@@ -182,8 +182,8 @@ def executable():
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%i/%s" %(global_args.frame, bamname))
-            os.mkdir(global_args.output_dir + "coverage_codon_frame%i/%s" % (global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %(global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" % (global_args.frame, bamname))
         except:
             pass
         thread_args.append((bampath, bamname))
@@ -198,8 +198,8 @@ def executable_2():
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%i/%s" %(global_args.frame, bamname))
-            os.mkdir(global_args.output_dir + "coverage_codon_frame%i/%s" % (global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %(global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" % (global_args.frame, bamname))
         except:
             pass
 
@@ -245,8 +245,8 @@ if __name__ == "__main__":
     global_args = parser.parse_args()
 
     try:
-        os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%i")
-        os.mkdir(global_args.output_dir +"coverage_codon_frame%i")
+        os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s"% global_args.frame)
+        os.mkdir(global_args.output_dir +"coverage_codon_frame%s"% global_args.frame)
 
     except:
         pass
