@@ -10,6 +10,7 @@ import multiprocessing
 from multiprocessing import Process, Pool
 import math
 from math import gcd
+from math import sqrt; from itertools import count, islice
 
 
 def create_assembly_dill(annotation_file):
@@ -52,6 +53,11 @@ def allowed_transcript_ids(filename):
         return list()
 
 
+
+def isPrime(n):
+    return n > 1 and all(n%i for i in islice(count(2), int(sqrt(n)-1)))
+
+
 def fetch_vectors(filenames):
 
     allowed_ids = set(allowed_transcript_ids(global_args.gene_set))
@@ -60,13 +66,15 @@ def fetch_vectors(filenames):
 
     except_count = 0
     count_vectors = []
-
+    name_vectors = []
     for transcript in extend_gtf_frame(global_args.annotation_file):
         if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             try:
                 value_array = transcript.get_counts(alignments)
                 if np.sum(value_array) > global_args.cutoff:
                     count_vectors.append(value_array)
+                    name_vectors.append(transcript.attr.get('Name'))
+
 
             except ValueError:
                 except_count += 1
@@ -74,45 +82,40 @@ def fetch_vectors(filenames):
     print("Vectors retrieved!")
     print("Removed %i transcripts!" % except_count)
 
-    tri_offset = global_args.offset / 3
-    count_vectors = list(map(lambda x: np.reshape(x, (-1, 3)), count_vectors))
-    bin_list = [[] for x in range(global_args.bins+2)]
+    tri_offset = global_args.offset // 3
+    count_vectors = (np.reshape(x, (-1, 3)) for x in count_vectors)
+    print("vectors reshaped!")
+    bin_list = list([list() for x in range(global_args.numbins+2)])
     bin_size_list = []
     for vector in count_vectors:
-        bin_size = ((vector.shape[0]-tri_offset*2) // global_args.bins) + \
-            ((vector.shape[0]-tri_offset*2) % global_args.bins > 0)
+        bin_size = ((vector.shape[0]-tri_offset*2) // global_args.numbins) + \
+            ((vector.shape[0]-tri_offset*2) % global_args.numbins > 0)
         bin_size_list.append(bin_size)
+
         bin_list[0].append(vector[:tri_offset])
         bin_list[-1].append(vector[-tri_offset:])
-        for ind in range(1, global_args.bins + 1):
+        for ind in range(1, global_args.numbins + 1):
             bin_list[ind].append(
                 vector[(tri_offset)+bin_size*(ind-1):tri_offset+bin_size*ind])
-    lcm = 1
-    for i in bin_size_list:
-        lcm = lcm*i/gcd(lcm, i)
 
-    for bins in bin_list[(1, -1)]:
-        bins = [(np.sum(np.vstack(x[0]), axis=0) for x in bins), (np.sum(np.vstack(x[1]), axis=0) for x in bins), (np.sum(np.vstack(x[2]), axis=0) for x in bins)]
-
-    for bins in bin_list[1:-2]:
-        for frames in bins:
-            frames = np.repeat(frames.T, lcm/frames.shape[0])
-        bins = [(np.sum(np.vstack(x[0]), axis=0) for x in bins), (np.sum(np.vstack(x[1]), axis=0) for x in bins), (np.sum(np.vstack(x[2]), axis=0) for x in bins)]
-
+    for numbins in bin_list:
+        for frames in numbins:
+            frames = np.sum(frames, axis = 0)
+        
     return bin_list
 
 
 def plot_results(bampath, bamname):
     frames = fetch_vectors(bampath)
 
-    for x in range(global_args.bins+2):
-        plt.subplot(1, global_args.bins+2, x)
+    for x in range(global_args.numbins+2):
+        plt.subplot(1, global_args.numbins+2, x)
         plt.plot(frames[x][0])
         plt.plot(frames[x][1])
         plt.plot(frames[x][2])
 
     plt.savefig(global_args.output_dir +
-                "bins_coverage/bins_%s.pdf" % bamname)
+                "numbins_coverage/numbins_%s.pdf" % bamname)
     plt.close()
 
 
@@ -127,7 +130,7 @@ def executable():
     thread_args = []
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "bins_coverage/")
+            os.mkdir(global_args.output_dir + "numbins_coverage/")
         except:
             pass
         thread_args.append((bampath, bamname))
@@ -140,8 +143,7 @@ def executable():
 def executable_2():
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "frames_coverage/")
-            os.mkdir(global_args.output_dir + "frames_coverage_term/")
+            os.mkdir(global_args.output_dir + "numbins_coverage/")
         except:
             pass
 
@@ -157,8 +159,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--gene_set")
     parser.add_argument("--normalize", type=bool, default=False)
-    parser.add_argument("--cutoff", type=int, default=10)
-    parser.add_argument("--bins", dtype=int, default=10)
+    parser.add_argument("--cutoff", type=int, default=50)
+    parser.add_argument("--numbins", default=10)
     global_args = parser.parse_args()
 
     if global_args.cores == 1:

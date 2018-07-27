@@ -71,10 +71,11 @@ def plot_results_start(bampath, bamname):
 
     fig, ax = triangle_plot(metagene[0], grid=[0.5, 0.75], marker=".", linewidth=0.01, alpha=0.5, vertex_labels=["0", "+1", "-1"])
 
-    """tri_metag = trianglize(metagene[0])
-    for i, name in enumerate(metagene[1]):
-        if np.max(metagene[0][i]) + 1-(np.max(metagene[0][i]) + np.min(metagene[0][i])) > 0.875:
-            ax.annotate(name, tri_metag[i], xytext=tri_metag[i], size=2)"""
+# Enable for labeling of individual transcripts in plot
+#    tri_metag = trianglize(metagene[0])
+#    for i, name in enumerate(metagene[1]):
+#        if np.max(metagene[0][i]) + 1-(np.max(metagene[0][i]) + np.min(metagene[0][i])) > 0.875:
+#            ax.annotate(name, tri_metag[i], xytext=tri_metag[i], size=2)
 
     plt.title("frame preference in %s" % bamname)
 
