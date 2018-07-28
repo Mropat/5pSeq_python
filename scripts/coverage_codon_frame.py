@@ -94,7 +94,7 @@ def fetch_vectors(filename):
                 readvec = transcript.get_counts(alignments)
                 readseq = transcript.get_sequence(fasta_dict)
 
-                for ind in range(global_args.offset+3+global_args.frame, len(readseq)-global_args.offset+global_args.frame, 3):
+                for ind in range(global_args.offset+3+global_args.frame, len(readseq)-global_args.offset-3+global_args.frame, 3):
                     codon = readseq[ind:ind+3]
                     if codon not in codon_dict:
                         codon_dict[codon] = np.atleast_2d(
@@ -137,6 +137,9 @@ def plot_results_start(bam_file_path, bamname):
         norm = "_norm"
 
     for key in codon_dict:
+        if global_args.save_vectors == True:
+            with open ("coverage_codon_frame%s/%s/%s%s.txt" % (global_args.frame, bamname, key, norm), "w") as wh:
+                np.savetxt(wh, codon_dict[key], header=str(np.linspace(-global_args.offset, global_args.offset)))
 
         plt.title(
             ("Peak at: " + str(codon_dict[key].argmax() - (global_args.offset))))
@@ -156,6 +159,9 @@ def plot_results_start(bam_file_path, bamname):
             collapsed_codons.append(np.atleast_2d(codon_dict[x]))
 
         collapsed_aa = np.vstack(collapsed_codons).sum(axis=0)
+        if global_args.save_vectors == True:
+            with open ("coverage_amino_acid_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm), "w") as wh:
+                np.savetxt(wh, collapsed_aa, header=str(np.linspace(-global_args.offset, global_args.offset)))
 
         plt.title(("Peak at: " + str(collapsed_aa.argmax() - (global_args.offset))))
         plt.grid(True, alpha=0.2)
@@ -242,11 +248,12 @@ if __name__ == "__main__":
     parser.add_argument("--gene_set")
     parser.add_argument("--normalize", type=bool, default=False)
     parser.add_argument("--frame", type=int, default=0)
+    parser.add_argument("--save_vectors", type=bool, default=True)
     global_args = parser.parse_args()
 
     try:
         os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s"% global_args.frame)
-        os.mkdir(global_args.output_dir +"coverage_codon_frame%s"% global_args.frame)
+        os.mkdir(global_args.output_dir +"coverage_codon_frame%s" % global_args.frame)
 
     except:
         pass
