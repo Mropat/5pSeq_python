@@ -69,7 +69,7 @@ def fetch_vectors(filename):
 def plot_results_start(bampath, bamname):
     metagene = fetch_vectors(bampath)
 
-    fig, ax = triangle_plot(metagene[0], grid=[0.5, 0.75], marker=".", linewidth=0.01, alpha=0.5, vertex_labels=["0", "+1", "-1"])
+    fig, ax = triangle_plot(metagene[0], grid=[0.5, 0.75], marker=".", linewidth=0.01, alpha=0.5, vertex_labels=["0", "1", "2"])
 
 # Enable for labeling of individual transcripts in plot
 #    tri_metag = trianglize(metagene[0])

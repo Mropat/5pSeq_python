@@ -11,6 +11,8 @@ from multiprocessing import Process, Pool
 import math
 from math import gcd
 from math import sqrt; from itertools import count, islice
+from plastid import plotting
+from plastid.plotting.plots import triangle_plot, trianglize
 
 
 def create_assembly_dill(annotation_file):
@@ -66,14 +68,14 @@ def fetch_vectors(filenames):
 
     except_count = 0
     count_vectors = []
-    name_vectors = []
+    #name_vectors = []
     for transcript in extend_gtf_frame(global_args.annotation_file):
         if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             try:
                 value_array = transcript.get_counts(alignments)
-                if np.sum(value_array) > global_args.cutoff:
+                if np.sum(value_array) > global_args.cutoff and len(value_array)>1200:
                     count_vectors.append(value_array)
-                    name_vectors.append(transcript.attr.get('Name'))
+                    #name_vectors.append(transcript.attr.get('Name'))
 
 
             except ValueError:
@@ -85,6 +87,7 @@ def fetch_vectors(filenames):
     tri_offset = global_args.offset // 3
     count_vectors = (np.reshape(x, (-1, 3)) for x in count_vectors)
     print("vectors reshaped!")
+    
     bin_list = list([list() for x in range(global_args.numbins+2)])
     bin_size_list = []
     for vector in count_vectors:
@@ -98,25 +101,28 @@ def fetch_vectors(filenames):
             bin_list[ind].append(
                 vector[(tri_offset)+bin_size*(ind-1):tri_offset+bin_size*ind])
 
-    for numbins in bin_list:
-        for frames in numbins:
-            frames = np.sum(frames, axis = 0)
-        
+    for ind_bins, numbins in enumerate(bin_list):
+        for ind, frames in enumerate(numbins): 
+            numbins[ind] = np.sum(frames, axis = 0)
+        numbins = np.vstack(numbins)
+        numbins = numbins[~np.any(numbins == 0, axis=1)]
+        bin_list[ind_bins] = (numbins.T/numbins.sum(1)).T
+
+    
     return bin_list
 
 
 def plot_results(bampath, bamname):
-    frames = fetch_vectors(bampath)
+    metagene = fetch_vectors(bampath)
+    for index, vec_bin in enumerate(metagene): 
 
-    for x in range(global_args.numbins+2):
-        plt.subplot(1, global_args.numbins+2, x)
-        plt.plot(frames[x][0])
-        plt.plot(frames[x][1])
-        plt.plot(frames[x][2])
 
-    plt.savefig(global_args.output_dir +
-                "numbins_coverage/numbins_%s.pdf" % bamname)
-    plt.close()
+        triangle_plot(vec_bin, grid=[0.5, 0.75], marker=".", linewidth=0.001, alpha=0.5, vertex_labels=["0", "1", "2"])
+
+        plt.title("frame preference in %s" % bamname)
+
+        plt.savefig(global_args.output_dir + "numbins_coverage/%s_frame%s.pdf" % (bamname, index))
+        plt.close()
 
 
 def runall_samples(directory):
@@ -152,15 +158,15 @@ def executable_2():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample_dir", required=True)
-    parser.add_argument("--annotation_file", required=True)
+    parser.add_argument("--sample_dir", default = "/home/maria/Documents/pelechanolab/data/samples/salt_stress/cutadapt/umitools/star/dedup")
+    parser.add_argument("--annotation_file", default = "/home/maria/Documents/pelechanolab/data/genomes/R64e/genes.gtf")
     parser.add_argument("--offset", type=int, default=48)
-    parser.add_argument("--cores", type=int, default=2)
-    parser.add_argument("--output_dir", required=True)
-    parser.add_argument("--gene_set")
+    parser.add_argument("--cores", type=int, default=4)
+    parser.add_argument("--output_dir", default = "/home/maria/Documents/pelechanolab/plots/")
+    parser.add_argument("--gene_set", default="/home/maria/Documents/pelechanolab/data/genomes/R64e/coding_list.txt")
     parser.add_argument("--normalize", type=bool, default=False)
-    parser.add_argument("--cutoff", type=int, default=50)
-    parser.add_argument("--numbins", default=10)
+    parser.add_argument("--cutoff", type=int, default=150)
+    parser.add_argument("--numbins", default=20)
     global_args = parser.parse_args()
 
     if global_args.cores == 1:

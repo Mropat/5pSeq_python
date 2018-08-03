@@ -12,8 +12,7 @@ import sys
 
 
 def create_assembly_dill(annotation_file):
-    """Preserves pickle of structure created by Transcript Assembler. When analyzing multiple samples, this saves several minutes per sample. """
-   
+
     if annotation_file.endswith("gtf"):
         gtf_file = list(GTF2_TranscriptAssembler(
             annotation_file, return_type=Transcript))
@@ -27,8 +26,7 @@ def create_assembly_dill(annotation_file):
 
 
 def extend_gtf_frame(pickle):
-    """"Extends the genomic span of each transcript by a number defined by offset argument. 
-    This is necessary for correctly fetching the complete vector surrounding ROI especially around transcript boundries"""
+
     pickle_path = global_args.output_dir + \
         global_args.annotation_file[:-4].split("/")[-1] + ".sav"
 
@@ -48,7 +46,7 @@ def extend_gtf_frame(pickle):
 
 
 def match_coords_to_seq(filename):
-    """Parses the fasta file (Same as used for mapping) into the format where Plastid can translate it to genomic coordinates"""
+
     fasta_dict = {}
     with open(filename, "r") as genomeseq:
         chrom = ""
@@ -66,9 +64,6 @@ def match_coords_to_seq(filename):
 
 
 def allowed_transcript_ids(filename):
-    """Used to handle newline delimited gene lists from files provided in the command line. 
-    Can be used to perform the calculations only on a specified set of genes, such as protein-coding genes,
-    or a pathway of interest """
     try:
         with open(filename, "r") as gene_list_file:
             return gene_list_file.read().splitlines()
@@ -77,8 +72,7 @@ def allowed_transcript_ids(filename):
 
 
 def fetch_vectors(filename):
-    """Fetches vectors surrounding each specific codon for plotting. 
-    Additional frame can be specified to check for frameshift. """
+
     fasta_dict = match_coords_to_seq(global_args.genome_fasta)
     allowed_ids = set(allowed_transcript_ids(global_args.gene_set))
     alignments = BAMGenomeArray(filename, mapping=FivePrimeMapFactory())
@@ -90,34 +84,38 @@ def fetch_vectors(filename):
     for transcript in extend_gtf_frame(global_args.annotation_file):
         if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             try:
-                # Necessary! Exception if foordinates out of bounds of annotation
+                # Necessary! Exception if coordinates out of bounds of annotation
                 readvec = transcript.get_counts(alignments)
                 readseq = transcript.get_sequence(fasta_dict)
 
-                for ind in range(global_args.offset+3+global_args.frame, len(readseq)-global_args.offset-3+global_args.frame, 3):
+                for ind in range(global_args.offset+3+global_args.frame, len(readseq)-global_args.offset-3+(-global_args.frame+3), 3):
                     codon = readseq[ind:ind+3]
                     if codon not in codon_dict:
-                        codon_dict[codon] = np.atleast_2d(
+                        codon_dict[codon] = list()
+                        codon_dict[codon].append(
                             readvec[ind-global_args.offset:ind+global_args.offset])
                     else:
-                        codon_dict[codon] = np.concatenate((codon_dict[codon], np.atleast_2d(
-                            readvec[ind-global_args.offset:ind+global_args.offset])), axis=0)
+                        codon_dict[codon].append(
+                            readvec[ind-global_args.offset:ind+global_args.offset])
             except ValueError:
                 out_range_count += 1
 
-    print ("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
+    print("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
     for key in codon_dict:
         if global_args.normalize == True:
-            codon_dict[key] = codon_dict[key][~np.all(codon_dict[key] == 0, axis=1)]
-            codon_dict[key] = codon_dict[key] / codon_dict[key].sum(1)[:, np.newaxis]
-        codon_dict[key] = codon_dict[key].sum(axis=0)
+            codon_dict[key] = np.vstack(codon_dict[key]).sum(axis=0)
+            codon_dict[key] = codon_dict[key][~np.all(
+                codon_dict[key] == 0, axis=1)]
+            codon_dict[key] = codon_dict[key] / \
+                codon_dict[key].sum(1)[:, np.newaxis]
+        codon_dict[key] = np.vstack(codon_dict[key]).sum(axis=0)
     print("Codons gathered for %s" % filename)
 
     return codon_dict
 
 
 def scale_labels():
-    """Custom scale lables for positional information. """
+
     xlabels = []
     for x in range(-global_args.offset+1, global_args.offset+1):
         if x % 10 == 0:
@@ -128,68 +126,75 @@ def scale_labels():
 
 
 def plot_results_start(bam_file_path, bamname):
-    """Creates plots of each codon, amino acid of interest and saves them in a folder"""
     codon_dict = fetch_vectors(bam_file_path)
     labels = scale_labels()
 
     norm = ""
     if global_args.normalize == True:
         norm = "_norm"
+    #Save vector as txt
+    if global_args.save_vectors == True:
+        with open(os.path.expanduser(global_args.output_dir + "coverage_codon_frame%s/%s/codons_%s%s.txt" % (str(global_args.frame), bamname, bamname, norm)), "w") as wh:
+            for key in codon_dict:
+                wh.write(">" + key + "\n")
+                wh.write("\t".join([str(int(x)) for x in codon_dict[key]]))
+                wh.write("\n")
+                
+        #Save plot af pdf
+                plt.title(
+                    ("Peak at: " + str(codon_dict[key].argmax() - (global_args.offset))))
+                plt.grid(True, alpha=0.2)
+                plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
+                        codon_dict[key], linewidth=0.5, color="red")
+                plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
+                        labels, size="xx-small")
+                plt.savefig(global_args.output_dir +
+                            "coverage_codon_frame%s/%s/%s%s.pdf" % (str(global_args.frame), bamname, key, norm))
+                plt.close()
 
-    for key in codon_dict:
-        if global_args.save_vectors == True:
-            with open ("coverage_codon_frame%s/%s/%s%s.txt" % (global_args.frame, bamname, key, norm), "w") as wh:
-                np.savetxt(wh, codon_dict[key], header=str(np.linspace(-global_args.offset, global_args.offset)))
 
-        plt.title(
-            ("Peak at: " + str(codon_dict[key].argmax() - (global_args.offset))))
-        plt.grid(True, alpha=0.2)
-        plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-                 codon_dict[key], linewidth=0.5, color="red")
-        plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-                   labels, size="xx-small")
-        plt.savefig(global_args.output_dir +
-                    "coverage_codon_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
-        plt.close()
+        #Save vector as txt
 
-    for key in aa_dict:
-        collapsed_codons = []
+        with open(os.path.expanduser(global_args.output_dir + "coverage_amino_acid_frame%s/%s/aminoacids_%s%s.txt" % (str(global_args.frame), bamname, bamname, norm)), "w") as wh2:
+            for key in aa_dict:
+                collapsed_codons = []
 
-        for x in aa_dict[key]:
-            collapsed_codons.append(np.atleast_2d(codon_dict[x]))
+                for x in aa_dict[key]:
+                    collapsed_codons.append(np.atleast_2d(codon_dict[x]))
+                collapsed_aa = np.vstack(collapsed_codons).sum(axis=0)
 
-        collapsed_aa = np.vstack(collapsed_codons).sum(axis=0)
-        if global_args.save_vectors == True:
-            with open ("coverage_amino_acid_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm), "w") as wh:
-                np.savetxt(wh, collapsed_aa, header=str(np.linspace(-global_args.offset, global_args.offset)))
+                wh2.write(">" + key + "\n")
+                wh2.write("\t".join([str(int(x)) for x in collapsed_aa]))
+                wh2.write("\n")
 
-        plt.title(("Peak at: " + str(collapsed_aa.argmax() - (global_args.offset))))
-        plt.grid(True, alpha=0.2)
-        plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-                 collapsed_aa, linewidth=0.5, color="red")
-        plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-                   labels, size="xx-small")
-        plt.savefig(global_args.output_dir +
-                    "coverage_amino_acid_frame%s/%s/%s%s.pdf" % (global_args.frame, bamname, key, norm))
-        plt.close()
+        #Save plot as pdf
+                plt.title(("Peak at: " + str(collapsed_aa.argmax() - (global_args.offset))))
+                plt.grid(True, alpha=0.2)
+                plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
+                        collapsed_aa, linewidth=0.5, color="red")
+                plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
+                        labels, size="xx-small")
+                plt.savefig(global_args.output_dir +
+                            "coverage_amino_acid_frame%s/%s/%s%s.pdf" % (str(global_args.frame), bamname, key, norm))
+                plt.close()
 
 
 def runall_samples(directory):
-    """Handles all the files of appropriate format in specified directory. """
     for filename in os.listdir(directory):
         if filename.endswith(".bam"):
             yield os.path.join(directory, filename), filename.split(".")[0]
 
 
 def executable():
-    """Enables threading for processing multiple files at once"""
     pool = Pool(processes=global_args.cores)
     thread_args = []
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %(global_args.frame, bamname))
-            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" % (global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %
+                     (str(global_args.frame), bamname))
+            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" %
+                     (str(global_args.frame), bamname))
         except:
             pass
         thread_args.append((bampath, bamname))
@@ -200,12 +205,13 @@ def executable():
 
 
 def executable_2():
-    """Alternative execution method for processing without threading and debugging in IDEs"""
 
     for bampath, bamname in runall_samples(global_args.sample_dir):
         try:
-            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %(global_args.frame, bamname))
-            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" % (global_args.frame, bamname))
+            os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s/%s" %
+                     (str(global_args.frame), bamname))
+            os.mkdir(global_args.output_dir + "coverage_codon_frame%s/%s" %
+                     (str(global_args.frame), bamname))
         except:
             pass
 
@@ -213,7 +219,6 @@ def executable_2():
 
 
 if __name__ == "__main__":
-    """Interprets command line arguments and holds command line variables for reuse by modules. Creates save folder for plots and files. """
 
     aa_dict = {
         "ALA": ["GCT", "GCC", "GCA", "GCG"],
@@ -245,15 +250,17 @@ if __name__ == "__main__":
     parser.add_argument("--offset", type=int, default=50)
     parser.add_argument("--cores", type=int, default=4)
     parser.add_argument("--output_dir", required=True)
-    parser.add_argument("--gene_set")
+    parser.add_argument("--gene_set", required=True)
     parser.add_argument("--normalize", type=bool, default=False)
     parser.add_argument("--frame", type=int, default=0)
     parser.add_argument("--save_vectors", type=bool, default=True)
     global_args = parser.parse_args()
 
     try:
-        os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s"% global_args.frame)
-        os.mkdir(global_args.output_dir +"coverage_codon_frame%s" % global_args.frame)
+        os.mkdir(global_args.output_dir + "coverage_amino_acid_frame%s" %
+                 str(global_args.frame))
+        os.mkdir(global_args.output_dir + "coverage_codon_frame%s" %
+                 str(global_args.frame))
 
     except:
         pass

@@ -75,7 +75,7 @@ def fetch_vectors(filename):
             vector_array = vector_array[~np.all(vector_array == 0, axis=1)]
             vector_array = vector_array / vector_array.sum(1)[:, np.newaxis]
             vector_array_term = vector_array_term[~np.all(vector_array_term == 0, axis=1)]
-            vector_array_term = vector_array / vector_array.sum(1)[:, np.newaxis]
+            vector_array_term = vector_array_term / vector_array_term.sum(1)[:, np.newaxis]
 
     metagene=vector_array.sum(axis=0)
     metagene_term=vector_array_term.sum(axis=0)
