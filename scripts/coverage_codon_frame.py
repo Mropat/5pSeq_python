@@ -9,6 +9,7 @@ from multiprocessing import Process, Pool
 import os
 import argparse
 import sys
+matplotlib.style.use("ggplot")
 
 
 def create_assembly_dill(annotation_file):
@@ -103,13 +104,15 @@ def fetch_vectors(filename):
     print("Transctipts out of bounds for %s: %i" % (filename, out_range_count))
     for key in codon_dict:
         if global_args.normalize == True:
-            codon_dict[key] = np.vstack(codon_dict[key]).sum(axis=0)
+            codon_dict[key] = np.vstack(codon_dict[key])
             codon_dict[key] = codon_dict[key][~np.all(
                 codon_dict[key] == 0, axis=1)]
-            codon_dict[key] = codon_dict[key] / \
-                codon_dict[key].sum(1)[:, np.newaxis]
-        codon_dict[key] = np.vstack(codon_dict[key]).sum(axis=0)
+            codon_dict[key] = codon_dict[key] / codon_dict[key].sum(1)[:, np.newaxis]
+            codon_dict[key] = codon_dict[key].sum(axis=0)
+        else:
+            codon_dict[key] = np.vstack(codon_dict[key]).sum(axis=0)
     print("Codons gathered for %s" % filename)
+
 
     return codon_dict
 
@@ -149,7 +152,7 @@ def plot_results_start(bam_file_path, bamname):
                 plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                         labels, size="xx-small")
                 plt.savefig(global_args.output_dir +
-                            "coverage_codon_frame%s/%s/%s%s.pdf" % (str(global_args.frame), bamname, key, norm))
+                            "coverage_codon_frame%s/%s/%s%s.png" % (str(global_args.frame), bamname, key, norm))
                 plt.close()
 
 
@@ -175,7 +178,7 @@ def plot_results_start(bam_file_path, bamname):
                 plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                         labels, size="xx-small")
                 plt.savefig(global_args.output_dir +
-                            "coverage_amino_acid_frame%s/%s/%s%s.pdf" % (str(global_args.frame), bamname, key, norm))
+                            "coverage_amino_acid_frame%s/%s/%s%s.png" % (str(global_args.frame), bamname, key, norm))
                 plt.close()
 
 

@@ -10,6 +10,7 @@ import argparse
 import sys
 import multiprocessing
 from multiprocessing import Process, Pool
+matplotlib.style.use("ggplot")
 
 
 def create_assembly_dill(annotation_file):
@@ -102,21 +103,21 @@ def plot_results_start(bampath, bamname):
     plt.title(("Peak at: " + str(metagene[0].argmax() - (global_args.offset))))
     plt.grid(True, alpha=0.3)
     plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-             metagene[0], linewidth=0.5, label=bamname)
+             metagene[0], linewidth=0.5, label=bamname, fillstyle="full", color="blue", aa=True)
     plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                labels, size="xx-small")
     plt.legend()
-    plt.savefig(global_args.output_dir + "coverage_start/%s%s.pdf" % (bamname, norm))
+    plt.savefig(global_args.output_dir + "coverage_start/%s%s.png" % (bamname, norm))
     plt.close()
 
     plt.title(("Peak at: " + str(metagene[1].argmax() - (global_args.offset))))
     plt.grid(True, alpha=0.3)
     plt.step(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
-             metagene[1], linewidth=0.5, label=bamname)
+             metagene[1], linewidth=0.5, label=bamname, fillstyle="full", color="blue", aa=True)
     plt.xticks(np.linspace(-global_args.offset, global_args.offset, num=global_args.offset*2),
                labels, size="xx-small")
     plt.legend()
-    plt.savefig(global_args.output_dir + "coverage_term/%s%s.pdf" % (bamname, norm))
+    plt.savefig(global_args.output_dir + "coverage_term/%s%s.png" % (bamname, norm))
     plt.close()
 
 

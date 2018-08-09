@@ -1,6 +1,12 @@
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--infile", required=True, help="Provide file with the feature table from assembly")
+parser.add_argument("--outfile", required=True)
+global_args = parser.parse_args()
 
 
-with open ("/home/maria/Documents/pelechanolab/data/l_reuteri/GCF_000159455.2_ASM15945v2_feature_table.txt", "r") as fh:
+with open (global_args.infile, "r") as fh:
     lines = fh.read().split("\n")
     coding_ids = []
     for line in lines:
@@ -9,5 +15,7 @@ with open ("/home/maria/Documents/pelechanolab/data/l_reuteri/GCF_000159455.2_AS
             if contents[1] == "with_protein":
                 coding_ids.append(contents[10])
 
-    with open ("coding_l_reuteri.txt", "w") as wh:
+    with open (global_args.outfile, "w") as wh:
         wh.write("\n".join(coding_ids))
+
+

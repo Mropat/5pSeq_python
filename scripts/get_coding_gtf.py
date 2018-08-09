@@ -1,9 +1,14 @@
-from plastid import * 
-import dill
+from plastid import GTF2_TranscriptAssembler, Transcript
+import argparse
 
-pickle_path = "plots/e_coli/genes.sav"
-gtf_coords_file = list(dill.load(open(pickle_path, "rb")))
-with open ("coding_list.txt", "w") as wh:
-    for transcript in gtf_coords_file:
+parser = argparse.ArgumentParser()
+parser.add_argument("--infile", required=True, help="Provide the *.gtf file")
+parser.add_argument("--outfile", required=True)
+global_args = parser.parse_args()
+
+gtf_file = list(GTF2_TranscriptAssembler(global_args.infile, return_type=Transcript))
+
+with open (global_args.outfile, "w") as wh:
+    for transcript in gtf_file:
         if transcript.attr.get('type') == "mRNA":
             wh.write(transcript.get_name() + "\n")

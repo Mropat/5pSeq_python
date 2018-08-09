@@ -11,7 +11,7 @@ import matplotlib.style
 matplotlib.style.use("ggplot")
 import pandas as pd
 from plastid import plotting
-from plastid.plotting.plots import *
+from plastid.plotting.plots import triangle_plot, trianglize
 
 def create_assembly_dill(annotation_file):
     if annotation_file.endswith("gtf"):
@@ -49,7 +49,7 @@ def fetch_vectors(filename):
     name_array = []
 
     for transcript in gtf_coords_file:
-        if any([transcript.attr.get('Name') in allowed_ids, transcript.attr.get("type") == "mRNA", transcript.attr.get("gene_biotype") == "protein_coding"]):
+        if any([transcript.attr.get('Name') in allowed_ids, transcript.get_name() in allowed_ids]):
             readvec = transcript.get_counts(alignments)
             if np.sum(readvec) > 30 and len(readvec) % 3 == 0:
                 if global_args.annotation_file.endswith("gtf"):
@@ -60,10 +60,10 @@ def fetch_vectors(filename):
                 vector_array.append(np.sum(readvec, axis=0))
 
     vector_array = np.vstack(vector_array)
-    sum_array = vector_array.sum(1).T
+    sum_array = vector_array.sum(0) / np.sum(vector_array.sum(0))
     vector_array = vector_array / vector_array.sum(1)[:, np.newaxis]
 
-    return vector_array, name_array
+    return vector_array, name_array, sum_array
 
 
 def plot_results_start(bampath, bamname):
@@ -71,7 +71,7 @@ def plot_results_start(bampath, bamname):
 
     fig, ax = triangle_plot(metagene[0], grid=[0.5, 0.75], marker=".", linewidth=0.01, alpha=0.5, vertex_labels=["0", "1", "2"])
 
-# Enable for labeling of individual transcripts in plot
+# Uncomment for labeling of individual transcripts in plot
 #    tri_metag = trianglize(metagene[0])
 #    for i, name in enumerate(metagene[1]):
 #        if np.max(metagene[0][i]) + 1-(np.max(metagene[0][i]) + np.min(metagene[0][i])) > 0.875:
@@ -79,8 +79,26 @@ def plot_results_start(bampath, bamname):
 
     plt.title("frame preference in %s" % bamname)
 
-    plt.savefig(global_args.output_dir + "trigplot/%s.pdf" % bamname)
+    plt.savefig(global_args.output_dir + "trigplot/%s.png" % bamname)
     plt.close()
+
+
+    plt.title("Ribosome Protection %s" % bamname)
+    plt.bar(np.arange(1, 4), metagene[2], color=["red", "green", "blue"])
+    plt.xticks(np.arange(1, 4))
+    plt.xlabel("Codon position")
+    plt.savefig(global_args.output_dir + "trigplot/%s_bar.png" % bamname)
+    plt.close()
+
+
+    plt.title("Ribosome Protection %s" % bamname)
+    plt.bar(np.arange(1, 4), metagene[0].sum(0), color=["red", "green", "blue"])
+    plt.xticks(np.arange(1, 4))
+    plt.xlabel("Codon position")
+    plt.savefig(global_args.output_dir + "trigplot/%s_bar_genes.png" % bamname)
+    plt.close()
+
+
 
 
 def runall_samples(directory):
